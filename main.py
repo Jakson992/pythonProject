@@ -1,70 +1,33 @@
-from random import choice
-gallows = [['-', '-', '-', '-', '-', '-'],
-           [' ', '|', ' ', ' ', '|', ' '],
-           [' ', '|', ' ', ' ', ' ', ' '],
-           [' ', '|', ' ', ' ', ' ', ' '],
-           [' ', '|', ' ', ' ', ' ', ' '],
-           ['/', ' ', '\\', ' ', ' ', ' '], ]
+rom pathlib import Path
 
-def draw_gallows(error_num=0):
-    def draw():
-        str_gallows = ''
-        for lst in gallows:
-            str_gallows += ''.join(lst) + '\n'
-        return str_gallows
+dir_suff_dict = {"Images": ['.jpg', '.jpeg', '.png', '.gif', '.svg'],
+                 "Documents": [ ".txt", ".docx", ".doc", ".pdf", ".pptx", ".docm", ".dox",
+                                ".xls", ".xlsx",  ".xml"],
+                 "Archives": [".iso", ".tar", ".gz", ".7z", ".dmg", ".rar", ".zip"],
+                 "Audio": [".aac", ".m4a", ".mp3", "ogg", ".raw", ".wav", ],
+                 "Video": [".avi", ".flv", ".wmv", ".mov", ".mp4", ".webm", ".vob", ".mpg", ".mpeg", ".3gp"],
+                 "HTML": [".html", ".htm", ".xhtml"],
+                 "EXE_MSI": [".exe", ".msi"],
+                 "PYTHON": [".py", ".pyw"]}
 
-    match error_num:
-        case 1:
-            gallows[2][4] = 'O'
-        case 2:
-            gallows[3][3] = '/'
-        case 3:
-            gallows[3][4] = '|'
-        case 4:
-            gallows[3][5] = '\\'
-        case 5:
-            gallows[4][3] = '/'
-        case 6:
-            gallows[4][5] = '\\'
 
-    return draw()
-
-def find_all(text: str, substring):
-    result = []
-    start_position = 0
-    for i in range(len(text)):
-        position = text.find(substring, start_position)
-        if position > -1:
-            result.append(position)
-            start_position = position + 1
-    return result
-
-def main():
-    print(draw_gallows())
-    word = choice (['pizza' , 'borszcz' , 'banana', 'kielbasa'])
-    answer_word = ['_' for _ in range(len(word))]
-    error_count = 0
-    lose = False
-    print(' '.join(answer_word))
-    while ''.join(answer_word) != word:
-        user_input = input('Type your letter >>> ')
-        if user_input in word:
-            letter_indexes = find_all(word, user_input)
-            for i in letter_indexes:
-                answer_word[i] = user_input
-            print(draw_gallows())
-            print(' '.join(answer_word))
-        else:
-            error_count += 1
-            print(draw_gallows(error_count))
-            print(' '.join(answer_word))
-        if error_count >= 6:
-            lose = True
-    if lose:
-        print('Game over \n Your lose')
-    else:
-        print('You win!!!')
+def sort_func(path_dir):
+    cur_dir = Path(path_dir)
+    for file in cur_dir.iterdir():
+        if file.is_dir():
+            if file.stat().st_size == 0:
+                file.rmdir()
+        for suff in dir_suff_dict:
+            if file.suffix.lower() in dir_suff_dict[suff]:
+                dir_img = cur_dir / suff
+                dir_img.mkdir(exist_ok=True)
+                file.rename(dir_img.joinpath(file.name))
 
 
 if __name__ == "__main__":
-    main()
+    path_d = input('[+] Введите путь к директории для сортировки: ')
+    if not Path(path_d).exists():
+        print('[-] Директории не существует')
+    else:
+        sort_func(path_d)
+    print('[!] Сортировка завершена')
